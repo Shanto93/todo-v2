@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import auth from "./../../../utils/firebase.config";
 
 const initialState = {
@@ -12,10 +12,27 @@ const initialState = {
 
 export const createUser = createAsyncThunk(
   "userSlice/createUser",
-  async ({ email, password }) => {
-    const data = createUserWithEmailAndPassword(auth, email, password);
-    console.log(data);
-    return;
+  async ({ email, password, name }, { rejectWithValue }) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+
+      console.log(userCredential);
+
+      return {
+        email: userCredential.user.email,
+        name: userCredential.user.displayName,
+      };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -43,8 +60,8 @@ const userSlice = createSlice({
         state.name = "";
         state.email = "";
         state.isLoading = false;
-        state.isError = false;
-        state.error = action.error.message;
+        state.isError = true;
+        state.error = action.payload || "An error occurred during signup.";
       });
   },
 });
