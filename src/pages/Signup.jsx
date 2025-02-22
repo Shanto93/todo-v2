@@ -28,11 +28,22 @@ const Signup = () => {
     }
   }, [password, confirmPassword]);
 
-  const onSubmit = ({ name, email, password }) => {
-    // Email Password signup
-    // console.log(name, email, password);
+  // const onSubmit = ({ name, email, password }) => {
+  //   // Email Password signup
+  //   // console.log(name, email, password);
 
-    dispatch(createUser({ email, password,name }));
+  //   dispatch(createUser({ email, password, name }));
+
+  //   navigate("/");
+  // };
+
+  const onSubmit = async ({ name, email, password }) => {
+    try {
+      await dispatch(createUser({ email, password, name })).unwrap();
+      navigate("/");
+    } catch (error) {
+      console.error("Signup failed:", error);
+    }
   };
 
   const handleGoogleLogin = () => {
